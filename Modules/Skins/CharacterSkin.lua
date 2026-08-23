@@ -1577,9 +1577,7 @@ local function SkinCharacterFrame()
 
     -- ===== Apply Scale =====
     local scale = GetSettings().scale or 1.0
-    if scale ~= 1.0 then
-        CharacterFrame:SetScale(scale)
-    end
+    CharacterFrame:SetScale(scale)
 
     -- ===== Mythic+ Score Widget (top-left corner) =====
     do
@@ -1986,9 +1984,7 @@ local function SkinInspectFrame()
 
     -- Apply scale to Inspect too
     local scale = GetSettings().scale or 1.0
-    if scale ~= 1.0 then
-        InspectFrame:SetScale(scale)
-    end
+    InspectFrame:SetScale(scale)
 end
 
 -- =====================================
@@ -2130,10 +2126,23 @@ function CS.Initialize()
 end
 
 -- =====================================
--- APPLY (config changes — requires reload)
+-- LIVE SCALE
+-- =====================================
+function CS.ApplyScale(scale)
+    local s = GetSettings()
+    scale = tonumber(scale) or s.scale or 1.0
+    if scale < 0.75 then scale = 0.75 elseif scale > 1.50 then scale = 1.50 end
+    s.scale = scale
+    if CharacterFrame then CharacterFrame:SetScale(scale) end
+    if _G.InspectFrame then _G.InspectFrame:SetScale(scale) end
+end
+
+-- =====================================
+-- APPLY (config changes — some skin toggles still require reload)
 -- =====================================
 
 function CS.ApplySettings()
+    CS.ApplyScale(GetSettings().scale or 1.0)
     if isInitialized then
         -- Refresh item info overlays (handles midnightEnchants toggle)
         if next(itemInfoFrames) then

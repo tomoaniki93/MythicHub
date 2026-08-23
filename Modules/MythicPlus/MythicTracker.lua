@@ -125,6 +125,17 @@ TMT.EDGE          = 1
 TMT.UPDATE_RATE   = 0.20
 TMT.BOSS_NAME_MAX = 22
 
+TMT.PREVIEW_DUNGEON = {
+    name = function() return (L and L["tmt_preview_dungeon_name"]) or "Autel des crochets" end,
+    elapsed = 1560,
+    timeLimit = 1800,
+    criteria = {
+        { criteriaString = "Rav'i", completed = true,  elapsed = 1230, icon = "Interface\AddOns\MythicHub\Textures\Preview\Ravi.tga" },
+        { criteriaString = "L'Ophidien ondulant", completed = true, elapsed = 735, icon = "Interface\AddOns\MythicHub\Textures\Preview\Ophidien.tga" },
+        { criteriaString = "Zul'jan", completed = false, elapsed = nil, icon = "Interface\AddOns\MythicHub\Textures\Preview\Zuljan.tga" },
+    },
+}
+
 -- Bundled fonts. Poppins matches the config UI, Expressway is the
 -- condensed face the HUD preset is designed around.
 TMT.FONT_PANEL = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -791,6 +802,12 @@ function TMT:BuildFrame()
         row.dot:SetPoint("LEFT", row, "LEFT", self.PAD, 0)
         row.dot:SetColorTexture(0.30, 0.30, 0.30, 1)
 
+        row.icon = row:CreateTexture(nil, "ARTWORK")
+        row.icon:SetSize(16, 16)
+        row.icon:SetPoint("LEFT", row.dot, "RIGHT", 6, 0)
+        row.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+        row.icon:Hide()
+
         row.name = self:MakeFS(row, 10, "OUTLINE")
         row.name:SetMaxLines(1)
         row.name:SetWordWrap(false)
@@ -875,6 +892,7 @@ function TMT:ApplyStyle()
         row.dot:SetShown(rows)
         row.name:ClearAllPoints()
         row.name:SetPoint("LEFT", row, "LEFT", rows and (self.PAD + 11) or self.PAD, 0)
+        if row.icon then row.icon:Hide() end
     end
 
     F.Hdr.progress:ClearAllPoints()
@@ -895,6 +913,7 @@ function TMT:ShowFrame()
 end
 
 function TMT:HideFrame()
+    self._previewActive = false
     if self.Frame then self.Frame:Hide() end
 end
 
@@ -984,7 +1003,7 @@ function TMT:UpdateHeader(preview)
     if db and db.showDungeonName then
         local name = L["tmt_dungeon_unknown"]
         if preview then
-            name = "Priory of the Sacred Flame"
+            name = self.PREVIEW_DUNGEON.name()
         elseif self.mapID and self.mapID > 0 then
             local n = C_ChallengeMode.GetMapUIInfo(self.mapID)
             if n then name = n end
@@ -1215,7 +1234,7 @@ function TMT:UpdateTimerBar(preview)
     local timeLimit = self.timeLimit or 1800
 
     if preview then
-        elapsed, timeLimit = 754, 1800
+        elapsed, timeLimit = self.PREVIEW_DUNGEON.elapsed, self.PREVIEW_DUNGEON.timeLimit
     elseif self.completionTime then
         elapsed = self.completionTime / 1000
     elseif C_ChallengeMode.IsChallengeModeActive() then
@@ -1483,16 +1502,8 @@ function TMT:UpdateBossRows(preview)
 
     local criteria = {}
     if preview then
-        criteria = {
-            -- cr.elapsed counts seconds SINCE the kill, so the boss killed
-            -- first carries the larger value. Reversed, the preview showed
-            -- boss 2 dying before boss 1 and a negative leg time.
-            { criteriaString = "Prioress Murrpray",   completed = true,  elapsed = 560 },
-            { criteriaString = "Sergeant Shaynemail", completed = true,  elapsed = 340 },
-            { criteriaString = "Captain Dailcry",     completed = false, elapsed = nil },
-            { criteriaString = "High Priest Aemya",   completed = false, elapsed = nil },
-        }
-        elapsed = 900
+        criteria = self.PREVIEW_DUNGEON.criteria
+        elapsed = self.PREVIEW_DUNGEON.elapsed
     else
         local steps = select(3, C_Scenario.GetStepInfo()) or 0
         for i = 1, steps do
@@ -1527,6 +1538,18 @@ function TMT:UpdateBossRows(preview)
         local row = self.Frame.BossRows[i]
         if not row then break end
         row:Show()
+
+        local previewIcon = preview and cr.icon
+        if row.icon and previewIcon then
+            row.icon:SetTexture(previewIcon)
+            row.icon:Show()
+            row.name:ClearAllPoints()
+            row.name:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
+        else
+            if row.icon then row.icon:Hide() end
+            row.name:ClearAllPoints()
+            row.name:SetPoint("LEFT", row, "LEFT", striped and (self.PAD + 11) or self.PAD, 0)
+        end
 
         if striped and i % 2 == 0 then
             row._bg:SetColorTexture(unpack(C.BG_ROW_ALT))
@@ -1731,11 +1754,25 @@ end
 -- ═══════════════════════════════════════════════════════════════════════
 function TMT:Preview()
     if not self.Frame then self:BuildFrame() end
+
+    if self._previewActive then
+        self._previewActive = false
+        if C_ChallengeMode and C_ChallengeMode.IsChallengeModeActive() then
+            self:RefreshAll(false)
+            self:ShowFrame()
+        else
+            self:HideFrame()
+        end
+        print((L and L["tmt_preview_hidden"]) or "Mythic+ tracker preview hidden.")
+        return
+    end
+
+    self._previewActive = true
     self.mapID          = 0
     self.level          = 20
     self.affixes        = {}
-    self.timeLimit      = 1800
-    self.chestTimes     = { [1] = 1800, [2] = 1440, [3] = 1080 }
+    self.timeLimit      = self.PREVIEW_DUNGEON.timeLimit
+    self.chestTimes     = { [1] = self.PREVIEW_DUNGEON.timeLimit, [2] = 1440, [3] = 1080 }
     self.bossKillTimes  = {}
     self.completionTime = nil
     self:RefreshAll(true)

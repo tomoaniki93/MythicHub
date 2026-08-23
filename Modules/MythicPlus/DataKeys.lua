@@ -136,13 +136,13 @@ local DB = {
 
     -- Season 2 rotation. Teleport spell IDs from the KeystoneLoot dataset
     -- (season 17 / build 12.1.0), cross-checked against the published
-    -- rotation: Altar of the Fangs, Murder Row, Nalorakk's Lair, The
-    -- Blinding Vale, Void Scar Arena.
+    -- rotation: Altar of Fangs, Murder Row, Den of Nalorakk, The
+    -- Blinding Vale, Voidscar Arena.
     [584] = { "The Blinding Vale",                      "TBV",    1286801 },
-    [585] = { "Void Scar Arena",                        "VSA",    1286804 },
-    [586] = { "Nalorakk's Lair",                        "NAL",    1286807 },
+    [585] = { "Voidscar Arena",                         "VSA",    1286804 },
+    [586] = { "Den of Nalorakk",                       "NAL",    1286807 },
     [587] = { "Murder Row",                             "MR",     1286809 },
-    [588] = { "Altar of the Fangs",                     "AOF",    1286812 },
+    [588] = { "Altar of Fangs",                         "AOF",    1286812 },
 }
 
 -- =====================================
@@ -388,16 +388,15 @@ end
 -- Falls back to hardcoded list if API data not available
 -- =====================================
 local HARDCODED_SEASON = {
-    542,  -- Eco-Dome Al'dani
-    499,  -- Priory of the Sacred Flame
-    525,  -- Operation: Floodgate
-    503,  -- Ara-Kara, City of Echoes
-    505,  -- The Dawnbreaker
-    378,  -- Halls of Atonement
-    391,  -- Tazavesh: Streets of Wonder
-    392,  -- Tazavesh: So'leah's Gambit
+    588,  -- Altar of Fangs
+    587,  -- Murder Row
+    586,  -- Den of Nalorakk
+    584,  -- The Blinding Vale
+    585,  -- Voidscar Arena
+    399,  -- Ruby Life Pools
+    249,  -- Kings' Rest
+    250,  -- Temple of Sethraliss
 }
-
 --- Is a dungeon teleport spell actually owned by this character?
 --- IsSpellKnown() alone is the wrong test here: it only reports spells the
 --- spellbook grants through the class/pet mechanism. Dungeon and raid

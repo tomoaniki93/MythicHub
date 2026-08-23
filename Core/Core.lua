@@ -4,7 +4,15 @@ local ADDON_NAME = ...
 MythicHub = MythicHub or {}
 local MH = MythicHub
 MH.name = "MythicHub"
-MH.version = "0.1.0-alpha"
+do
+    local version
+    if C_AddOns and C_AddOns.GetAddOnMetadata then
+        version = C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version")
+    elseif GetAddOnMetadata then
+        version = GetAddOnMetadata(ADDON_NAME, "Version")
+    end
+    MH.version = version or "0.1.3-beta"
+end
 MH.colorHex = "00AFFF"
 MH.prefix = "|cff00AFFFMythic|r|cffffffffHub|r"
 
@@ -62,7 +70,7 @@ MythicHub_Widgets.Theme = {
 }
 
 MythicHub_Defaults = {
-    schemaVersion = 1,
+    schemaVersion = 3,
     debug = false,
     layoutUnlocked = false,
 
@@ -97,7 +105,7 @@ MythicHub_Defaults = {
         splits = {},
     },
 
-    TomoScore = {
+    MythicHubScore = {
         enabled = true,
         autoShowMPlus = true,
         scale = 1.0,
@@ -125,6 +133,22 @@ MythicHub_Defaults = {
 
     advisor = {
         enabled = true,
+    },
+
+    runHistory = {
+        enabled = true,
+        maxRuns = 100,
+        runs = {},
+    },
+
+    scorePlanner = {
+        enabled = true,
+        targetIncrease = 1,
+    },
+
+    minimap = {
+        enabled = true,
+        angle = 225,
     },
 
     characterSkin = {
@@ -208,11 +232,16 @@ function MH:SetLayoutUnlocked(unlocked)
     local rez = MythicHub_ResurrectTracker
     if rez and rez.SetLocked then rez.SetLocked(not unlocked) end
 
-    local score = MythicHub_TomoScore
+    local score = MythicHub_MythicHubScore or MythicHub_TomoScore
     if score then
         local db = score.GetDB and score:GetDB()
         if db then db.locked = not unlocked end
-        if score.SB then score.SB:EnableMouse(unlocked) end
+        if score.SetMovable then
+            score:SetMovable(unlocked)
+        elseif score.SB then
+            score.SB:SetMovable(true)
+            score.SB:EnableMouse(true)
+        end
     end
 
     if MythicHubDB.mythicHub then
@@ -234,12 +263,20 @@ function MH:ApplyLiveSettings()
     if MythicHub_ResurrectTracker and MythicHub_ResurrectTracker.ApplySettings then
         MythicHub_ResurrectTracker.ApplySettings()
     end
-    if MythicHub_TomoScore and MythicHub_TomoScore.SB then
-        local db = MythicHubDB and MythicHubDB.TomoScore
+    local score = MythicHub_MythicHubScore or MythicHub_TomoScore
+    if score and score.SB then
+        local db = MythicHubDB and MythicHubDB.MythicHubScore
         if db then
-            MythicHub_TomoScore.SB:SetScale(db.scale or 1)
-            MythicHub_TomoScore.SB:SetAlpha(db.alpha or 0.95)
+            score.SB:SetScale(db.scale or 1)
+            score.SB:SetAlpha(db.alpha or 0.95)
         end
+    end
+    if MythicHub_CharacterSkin and MythicHub_CharacterSkin.ApplyScale then
+        local cdb = MythicHubDB and MythicHubDB.characterSkin
+        if cdb then MythicHub_CharacterSkin.ApplyScale(cdb.scale or 1) end
+    end
+    if MythicHub_Minimap and MythicHub_Minimap.ApplySettings then
+        MythicHub_Minimap:ApplySettings()
     end
 end
 
@@ -250,6 +287,12 @@ init:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" then
         if addon ~= ADDON_NAME then return end
         MythicHubDB = type(MythicHubDB) == "table" and MythicHubDB or {}
+        -- 0.1.2: TomoScore was renamed to MythicHubScore. Preserve existing
+        -- settings/position/last run during the migration.
+        if type(MythicHubDB.TomoScore) == "table" and type(MythicHubDB.MythicHubScore) ~= "table" then
+            MythicHubDB.MythicHubScore = MythicHubDB.TomoScore
+        end
+        MythicHubDB.TomoScore = nil
         MergeDefaults(MythicHubDB, MythicHub_Defaults)
         MythicHubDB.schemaVersion = MythicHub_Defaults.schemaVersion
         return

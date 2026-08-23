@@ -5,7 +5,7 @@ local MH = MythicHub
 local L = MythicHub_L
 local TH = MythicHub_Widgets.Theme
 
-local W, H = 840, 650
+local W, H = 840, 700
 local SIDEBAR = 178
 local PAD = 18
 local panels = {}
@@ -64,7 +64,9 @@ local function Check(parent, label, path, x, y, callback)
     mark:SetPoint("CENTER", box); mark:SetSize(10,10); Color(mark, TH.accent)
 
     local text = MakeText(b, 12, label, "LEFT", box, "RIGHT", 9, 0, TH.text)
+    text:SetWidth(235)
     text:SetJustifyH("LEFT")
+    text:SetWordWrap(false)
 
     local function Refresh()
         local t,k = GetPath(path)
@@ -197,7 +199,7 @@ function CFG:Build()
 
     local sidebar=CreateFrame("Frame",nil,F,"BackdropTemplate"); sidebar:SetPoint("TOPLEFT",F,"TOPLEFT",0,-68); sidebar:SetPoint("BOTTOMLEFT",F,"BOTTOMLEFT",0,0); sidebar:SetWidth(SIDEBAR); sidebar:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8x8"}); sidebar:SetBackdropColor(TH.bgDark[1],TH.bgDark[2],TH.bgDark[3],.92)
 
-    local tabs={{"dashboard",L["gui_dashboard"]},{"tracker",L["gui_tracker"]},{"keys",L["gui_keys_score"]},{"character",L["gui_character"]},{"brez",L["gui_brez"]}}
+    local tabs={{"dashboard",L["gui_dashboard"]},{"tracker",L["gui_tracker"]},{"keys",L["gui_keys_score"]},{"progression",L["gui_progression"]},{"character",L["gui_character"]},{"brez",L["gui_brez"]}}
     for i,info in ipairs(tabs) do
         local key,label=info[1],info[2]
         local b=CreateFrame("Button",nil,sidebar); b:SetPoint("TOPLEFT",sidebar,"TOPLEFT",0,-(18+(i-1)*44)); b:SetSize(SIDEBAR,38)
@@ -213,23 +215,26 @@ function CFG:Build()
     MakeText(p,11,L["gui_about"],"TOPLEFT",p,"TOPLEFT",0,-28,TH.textDim,610)
     local cardW=142
     self.cards={score=Card(p,"MYTHIC+ SCORE",0,-68,cardW), key=Card(p,"YOUR KEY",154,-68,cardW), group=Card(p,"GROUP KEYS",308,-68,cardW), brez=Card(p,"BATTLE REZ",462,-68,cardW)}
-    local mod=Section(p,L["gui_modules"],0,-162,602); mod:SetHeight(208)
+    local mod=Section(p,L["gui_modules"],0,-162,602); mod:SetHeight(238)
     Check(mod,"Mythic+ Hub",{"mythicHub","enabled"},12,-38,function(on) if not on and MythicHub_MythicHub then MythicHub_MythicHub:Hide() end end)
     Check(mod,"Mythic+ Tracker",{"MythicTracker","enabled"},12,-68,function(on) if not on and MythicHub_MythicTracker then MythicHub_MythicTracker:HideFrame() end end)
-    Check(mod,"TomoScore",{"TomoScore","enabled"},12,-98,function(on) if not on and MythicHub_TomoScore then MythicHub_TomoScore:HideScoreboard() end end)
+    Check(mod,L["gui_score_name"],{"MythicHubScore","enabled"},12,-98,function(on) if not on and MythicHub_MythicHubScore then MythicHub_MythicHubScore:HideScoreboard() end end)
     Check(mod,"Keystone Viewer / Roulette",{"MythicKeys","enabled"},12,-128)
     Check(mod,L["gui_keysync"],{"KeySync","enabled"},310,-38)
     Check(mod,L["gui_auto_key"],{"autoKeystone","enabled"},310,-68)
     Check(mod,"Character + Inspect",{"characterSkin","enabled"},310,-98)
     Check(mod,"Battle Rez",{"battleRez","enabled"},310,-128,function() if MythicHub_ResurrectTracker then MythicHub_ResurrectTracker.ApplySettings() end end)
+    Check(mod,L["gui_run_history"],{"runHistory","enabled"},12,-158,function(on) if not on and MythicHub_RunHistory then MythicHub_RunHistory:Hide() end end)
+    Check(mod,L["gui_score_planner"],{"scorePlanner","enabled"},12,-188,function(on) if not on and MythicHub_ScorePlanner then MythicHub_ScorePlanner:Hide() end end)
     Check(mod,L["gui_advisor"],{"advisor","enabled"},310,-158)
+    Check(mod,L["gui_minimap"],{"minimap","enabled"},310,-188,function() if MythicHub_Minimap then MythicHub_Minimap:ApplySettings() end end)
 
-    local quick=Section(p,L["gui_quick"],0,-382,602); quick:SetHeight(158)
+    local quick=Section(p,L["gui_quick"],0,-416,602); quick:SetHeight(158)
     Action(quick,L["gui_open_hub"],12,-38,180,function() if MythicHub_MythicHub then MythicHub_MythicHub:Toggle() end end)
     Action(quick,L["gui_send_keys"],204,-38,180,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:SendKeysToChat() end end)
     Action(quick,L["gui_roulette"],396,-38,180,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:ShowKeyRoulette() end end)
     Action(quick,L["gui_tracker_preview"],12,-78,180,function() if MythicHub_MythicTracker then MythicHub_MythicTracker:Preview() end end)
-    Action(quick,L["gui_score_preview"],204,-78,180,function() if MythicHub_TomoScore then MythicHub_TomoScore:ShowPreview() end end)
+    Action(quick,L["gui_score_preview"],204,-78,180,function() if MythicHub_MythicHubScore then MythicHub_MythicHubScore:ShowPreview() end end)
     Action(quick,L["gui_advisor_btn"],396,-78,180,function() if MythicHub_KeystoneAdvisor then MythicHub_KeystoneAdvisor:PrintRecommendation() end end)
     Action(quick,L["gui_unlock"],12,-118,276,function() MH:SetLayoutUnlocked(true); CFG:Refresh() end)
     Action(quick,L["gui_lock"],300,-118,276,function() MH:SetLayoutUnlocked(false); CFG:Refresh() end)
@@ -237,7 +242,7 @@ function CFG:Build()
     -- TRACKER
     p=panels.tracker
     MakeText(p,18,L["gui_tracker"],"TOPLEFT",p,"TOPLEFT",0,0,TH.text)
-    local general=Section(p,"Display",0,-38,290); general:SetHeight(310)
+    local general=Section(p,L["gui_display"],0,-38,290); general:SetHeight(310)
     Check(general,L["gui_enabled"],{"MythicTracker","enabled"},12,-38)
     Check(general,L["gui_hide_blizzard"],{"MythicTracker","hideBlizzard"},12,-68)
     Check(general,L["gui_show_timer"],{"MythicTracker","showTimer"},12,-98)
@@ -248,14 +253,14 @@ function CFG:Build()
     Check(general,L["gui_show_dungeon"],{"MythicTracker","showDungeonName"},12,-248)
     Check(general,L["gui_splits"],{"MythicTracker","splitsEnabled"},12,-278)
 
-    local style=Section(p,"Style & progression",304,-38,298); style:SetHeight(310)
+    local style=Section(p,L["gui_style_progress"],304,-38,298); style:SetHeight(310)
     Cycle(style,L["gui_preset"],{"MythicTracker","preset"},{"panel","hud","minimal"},{panel="Panel",hud="HUD",minimal="Minimal"},12,-38,270,function(v) if MythicHub_MythicTracker then MythicHub_MythicTracker:ApplyPreset(v); MythicHub_MythicTracker:RefreshStyle() end end)
     Cycle(style,L["gui_objective"],{"MythicTracker","objectiveStyle"},{"rows","text","none"},{rows="Rows",text="Text",none="Hidden"},12,-92,270,function() if MythicHub_MythicTracker then MythicHub_MythicTracker:ResolvePreset() end end)
     Cycle(style,L["gui_timer_layout"],{"MythicTracker","timerLayout"},{"stacked","inline"},{stacked="Stacked",inline="Inline"},12,-146,270,function() if MythicHub_MythicTracker then MythicHub_MythicTracker:ResolvePreset() end end)
     Cycle(style,L["gui_segment"],{"MythicTracker","segmentColors"},{"palier","brand"},{palier="Tier colors",brand="Azure"},12,-200,270,function() if MythicHub_MythicTracker then MythicHub_MythicTracker:ResolvePreset() end end)
     Check(style,L["gui_checkpoints"],{"MythicTracker","checkpointsEnabled"},12,-258)
 
-    local sizes=Section(p,"Size & opacity",0,-362,602); sizes:SetHeight(150)
+    local sizes=Section(p,L["gui_size_opacity"],0,-362,602); sizes:SetHeight(150)
     Slider(sizes,L["gui_scale"],{"MythicTracker","scale"},0.65,1.50,0.05,12,-38,270,function(v) if MythicHub_MythicTracker and MythicHub_MythicTracker.Frame then MythicHub_MythicTracker.Frame:SetScale(v) end end,function(v)return string.format("%d%%",v*100)end)
     Slider(sizes,L["gui_alpha"],{"MythicTracker","alpha"},0.30,1.00,0.05,310,-38,270,nil,function(v)return string.format("%d%%",v*100)end)
     Slider(sizes,L["gui_font_scale"],{"MythicTracker","fontScale"},0.70,1.50,0.05,12,-92,270,nil,function(v)return string.format("%d%%",v*100)end)
@@ -265,28 +270,58 @@ function CFG:Build()
     -- KEYS & SCORE
     p=panels.keys
     MakeText(p,18,L["gui_keys_score"],"TOPLEFT",p,"TOPLEFT",0,0,TH.text)
-    local keys=Section(p,"Keystones",0,-38,602); keys:SetHeight(182)
+    local keys=Section(p,L["gui_keystones"],0,-38,602); keys:SetHeight(214)
     Check(keys,"Keystone module",{"MythicKeys","enabled"},12,-38)
     Check(keys,L["gui_keysync"],{"KeySync","enabled"},12,-68)
     Check(keys,L["gui_auto_key"],{"autoKeystone","enabled"},12,-98)
-    Check(keys,L["gui_advisor"],{"advisor","enabled"},310,-38)
-    Action(keys,L["gui_send_keys"],310,-76,126,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:SendKeysToChat() end end)
-    Action(keys,L["gui_roulette"],444,-76,126,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:ShowKeyRoulette() end end)
-    Action(keys,L["gui_advisor_btn"],310,-116,260,function() if MythicHub_KeystoneAdvisor then MythicHub_KeystoneAdvisor:PrintRecommendation() end end)
+    Check(keys,L["gui_advisor"],{"advisor","enabled"},12,-128)
+    Action(keys,L["gui_send_keys"],310,-38,260,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:SendKeysToChat() end end)
+    Action(keys,L["gui_roulette"],310,-78,260,function() if MythicHub_MythicKeys then MythicHub_MythicKeys:ShowKeyRoulette() end end)
+    Action(keys,L["gui_advisor_btn"],310,-118,260,function() if MythicHub_KeystoneAdvisor then MythicHub_KeystoneAdvisor:PrintRecommendation() end end)
 
-    local score=Section(p,"TomoScore",0,-236,602); score:SetHeight(256)
-    Check(score,L["gui_enabled"],{"TomoScore","enabled"},12,-38)
-    Check(score,L["gui_auto_score"],{"TomoScore","autoShowMPlus"},12,-68)
-    Slider(score,L["gui_scale"],{"TomoScore","scale"},0.65,1.50,0.05,12,-108,270,nil,function(v)return string.format("%d%%",v*100)end)
-    Slider(score,L["gui_alpha"],{"TomoScore","alpha"},0.30,1.00,0.05,310,-108,270,nil,function(v)return string.format("%d%%",v*100)end)
-    Action(score,L["gui_score_preview"],12,-172,178,function() if MythicHub_TomoScore then MythicHub_TomoScore:ShowPreview() end end)
-    Action(score,L["gui_score_last"],202,-172,178,function() if MythicHub_TomoScore then MythicHub_TomoScore:ShowLastRun() end end)
-    Action(score,L["gui_reset_pos"],392,-172,178,function() if MythicHub_TomoScore then MythicHub_TomoScore:ResetPosition() end end)
+    local score=Section(p,L["gui_score_name"],0,-268,602); score:SetHeight(286)
+    Check(score,L["gui_enabled"],{"MythicHubScore","enabled"},12,-38)
+    Check(score,L["gui_auto_score"],{"MythicHubScore","autoShowMPlus"},12,-68)
+    Slider(score,L["gui_scale"],{"MythicHubScore","scale"},0.65,1.50,0.05,12,-108,270,nil,function(v)return string.format("%d%%",v*100)end)
+    Slider(score,L["gui_alpha"],{"MythicHubScore","alpha"},0.30,1.00,0.05,310,-108,270,nil,function(v)return string.format("%d%%",v*100)end)
+    Action(score,L["gui_score_preview"],12,-172,178,function() if MythicHub_MythicHubScore then MythicHub_MythicHubScore:ShowPreview() end end)
+    Action(score,L["gui_score_last"],202,-172,178,function() if MythicHub_MythicHubScore then MythicHub_MythicHubScore:ShowLastRun() end end)
+    Action(score,L["gui_reset_pos"],392,-172,178,function() if MythicHub_MythicHubScore then MythicHub_MythicHubScore:ResetPosition() end end)
+    Action(score,L["gui_unlock_score"],12,-214,276,function()
+        if MythicHub_MythicHubScore then MythicHub_MythicHubScore:SetMovable(true) end
+    end)
+    Action(score,L["gui_lock_score"],300,-214,276,function()
+        if MythicHub_MythicHubScore then MythicHub_MythicHubScore:SetMovable(false) end
+    end)
+
+    -- PROGRESSION
+    p=panels.progression
+    MakeText(p,18,L["gui_progression"],"TOPLEFT",p,"TOPLEFT",0,0,TH.text)
+
+    local hist=Section(p,L["gui_run_history"],0,-38,602); hist:SetHeight(190)
+    Check(hist,L["gui_enabled"],{"runHistory","enabled"},12,-38,function(on) if not on and MythicHub_RunHistory then MythicHub_RunHistory:Hide() end end)
+    Slider(hist,L["gui_history_max"],{"runHistory","maxRuns"},25,250,25,12,-78,270,nil,function(v)return tostring(math.floor(v+0.5))end)
+    Action(hist,L["gui_open_history"],310,-38,260,function() if MythicHub_RunHistory then MythicHub_RunHistory:Toggle() end end)
+    Action(hist,L["gui_sync_history"],310,-78,260,function() if MythicHub_RunHistory then MythicHub_RunHistory:SyncFromBlizzard(); MythicHub_RunHistory:Refresh() end end)
+    Action(hist,L["gui_clear_history"],310,-118,260,function()
+        if not IsShiftKeyDown() then print(MH.prefix .. " " .. L["history_shift_clear"]); return end
+        if MythicHub_RunHistory then MythicHub_RunHistory:Clear() end
+    end)
+
+    local planner=Section(p,L["gui_score_planner"],0,-242,602); planner:SetHeight(176)
+    Check(planner,L["gui_enabled"],{"scorePlanner","enabled"},12,-38,function(on) if not on and MythicHub_ScorePlanner then MythicHub_ScorePlanner:Hide() end end)
+    Cycle(planner,L["gui_target_increase"],{"scorePlanner","targetIncrease"},{1,2,3},{[1]="+1",[2]="+2",[3]="+3"},12,-78,270,function() if MythicHub_ScorePlanner then MythicHub_ScorePlanner:Refresh() end end)
+    Action(planner,L["gui_open_planner"],310,-38,260,function() if MythicHub_ScorePlanner then MythicHub_ScorePlanner:Toggle() end end)
+    Action(planner,L["gui_advisor_btn"],310,-78,260,function() if MythicHub_ScorePlanner then MythicHub_ScorePlanner:PrintRecommendation() end end)
+
+    local access=Section(p,L["gui_minimap"],0,-432,602); access:SetHeight(132)
+    Check(access,L["gui_minimap"],{"minimap","enabled"},12,-38,function() if MythicHub_Minimap then MythicHub_Minimap:ApplySettings() end end)
+    MakeText(access,11,L["minimap_tooltip"],"TOPLEFT",access,"TOPLEFT",12,-74,TH.textDim,566)
 
     -- CHARACTER
     p=panels.character
     MakeText(p,18,L["gui_character"],"TOPLEFT",p,"TOPLEFT",0,0,TH.text)
-    local skin=Section(p,"Character Sheet",0,-38,602); skin:SetHeight(292)
+    local skin=Section(p,L["gui_character_sheet"],0,-38,602); skin:SetHeight(292)
     Check(skin,L["gui_enabled"],{"characterSkin","enabled"},12,-38)
     Check(skin,L["gui_char_skin"],{"characterSkin","skinCharacter"},12,-68)
     Check(skin,L["gui_inspect_skin"],{"characterSkin","skinInspect"},12,-98)
@@ -294,16 +329,19 @@ function CFG:Build()
     Check(skin,L["gui_gems"],{"characterSkin","showGems"},12,-158)
     Check(skin,L["gui_inspect_info"],{"characterSkin","showInspectItemInfo"},12,-188)
     Check(skin,L["gui_char_movable"],{"characterSkin","movable"},12,-218,function(on) if MythicHub_CharacterSkin then MythicHub_CharacterSkin.SetMovable(on) end end)
-    Check(skin,"Midnight enchant display",{"characterSkin","midnightEnchants"},310,-38,function() if MythicHub_CharacterSkin then MythicHub_CharacterSkin.ApplySettings() end end)
-    local note=MakeText(skin,11,L["gui_reload_note"],"TOPLEFT",skin,"TOPLEFT",310,-86,TH.textDim,260)
-    Action(skin,L["gui_reset_pos"],310,-148,260,function() if MythicHub_CharacterSkin then MythicHub_CharacterSkin.ResetCharacterPosition() end end)
-    local info=Section(p,"Integrated Mythic+ info",0,-346,602); info:SetHeight(142)
-    MakeText(info,11,"The skin keeps the Mythic+ rating widget from TomoMod. Clicking the score opens the MythicHub overview, with season dungeons, best runs, teleports and Great Vault status.","TOPLEFT",info,"TOPLEFT",12,-40,TH.textDim,566)
+    Check(skin,L["gui_midnight_enchants"],{"characterSkin","midnightEnchants"},310,-38,function() if MythicHub_CharacterSkin then MythicHub_CharacterSkin.ApplySettings() end end)
+    local note=MakeText(skin,11,L["gui_reload_note"],"TOPLEFT",skin,"TOPLEFT",310,-76,TH.textDim,260)
+    Slider(skin,L["gui_character_scale"],{"characterSkin","scale"},0.75,1.50,0.05,310,-122,260,function(v)
+        if MythicHub_CharacterSkin and MythicHub_CharacterSkin.ApplyScale then MythicHub_CharacterSkin.ApplyScale(v) end
+    end,function(v)return string.format("%d%%",v*100)end)
+    Action(skin,L["gui_reset_pos"],310,-190,260,function() if MythicHub_CharacterSkin then MythicHub_CharacterSkin.ResetCharacterPosition() end end)
+    local info=Section(p,L["gui_integrated_mplus"],0,-346,602); info:SetHeight(142)
+    MakeText(info,11,L["gui_mplus_info_text"],"TOPLEFT",info,"TOPLEFT",12,-40,TH.textDim,566)
 
     -- BATTLE REZ
     p=panels.brez
     MakeText(p,18,L["gui_brez"],"TOPLEFT",p,"TOPLEFT",0,0,TH.text)
-    local rez=Section(p,"Counter",0,-38,602); rez:SetHeight(272)
+    local rez=Section(p,L["gui_counter"],0,-38,602); rez:SetHeight(272)
     Check(rez,L["gui_enabled"],{"battleRez","enabled"},12,-38,function() if MythicHub_ResurrectTracker then MythicHub_ResurrectTracker.ApplySettings() end end)
     Check(rez,L["gui_only_instance"],{"battleRez","onlyInstance"},12,-68,function() if MythicHub_ResurrectTracker then MythicHub_ResurrectTracker.ApplySettings() end end)
     Check(rez,L["gui_swipe"],{"battleRez","showSwipe"},12,-98,function() if MythicHub_ResurrectTracker then MythicHub_ResurrectTracker.ApplySettings() end end)
@@ -314,8 +352,8 @@ function CFG:Build()
     Action(rez,L["gui_reset_pos"],396,-204,180,function()
         MythicHubDB.battleRez.position={point="CENTER",relativePoint="CENTER",x=0,y=200}; if MythicHub_ResurrectTracker then MythicHub_ResurrectTracker.ApplySettings() end
     end)
-    local help=Section(p,"How it works",0,-326,602); help:SetHeight(156)
-    MakeText(help,11,"The counter reads the pooled Mythic+ / raid combat-resurrection charges from the game API. It shows remaining charges and recharge progress without combat-log parsing, and can be moved with /mh unlock.","TOPLEFT",help,"TOPLEFT",12,-40,TH.textDim,566)
+    local help=Section(p,L["gui_how_it_works"],0,-326,602); help:SetHeight(156)
+    MakeText(help,11,L["gui_brez_help_text"],"TOPLEFT",help,"TOPLEFT",12,-40,TH.textDim,566)
 
     self:Select("dashboard")
     F:Hide()

@@ -1,10 +1,13 @@
 ## Interface: 120100
 ## Title: |cff00AFFFMythic|r|cffffffffHub|r
-## Notes: Standalone Mythic+ toolkit: tracker, TomoScore, keystone sync/roulette, overview hub, Character/Inspect skin, teleports and Battle Rez counter.
+## Notes: Standalone Mythic+ toolkit: tracker, MythicHubScore, keystone sync/roulette, overview hub, Character/Inspect skin, teleports and Battle Rez counter.
 ## Author: TomoAniki
-## Version: 0.1.0-beta
+## Version: 0.1.3-beta
 ## SavedVariables: MythicHubDB
 ## IconTexture: Interface\AddOns\MythicHub\Textures\Logo.tga
+## AddonCompartmentFunc: MythicHub_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: MythicHub_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: MythicHub_OnAddonCompartmentLeave
 ## Category: |cffCC44FFTomo|r|cffFFFFFFSuite|r
 
 Core\Core.lua
@@ -17,17 +20,20 @@ Locales\itIT.lua
 Locales\ptBR.lua
 
 Modules\MythicPlus\DataKeys.lua
+Modules\MythicPlus\RunHistory.lua
+Modules\MythicPlus\ScorePlanner.lua
 Modules\MythicPlus\KeySync.lua
 Modules\MythicPlus\AutoKeystone.lua
 Modules\MythicPlus\MythicTracker.lua
 Modules\MythicPlus\MythicKeys.lua
-Modules\MythicPlus\TomoScoreCore.lua
-Modules\MythicPlus\TomoScoreData.lua
-Modules\MythicPlus\TomoScoreUI.lua
+Modules\MythicPlus\MythicHubScoreCore.lua
+Modules\MythicPlus\MythicHubScoreData.lua
+Modules\MythicPlus\MythicHubScoreUI.lua
 Modules\MythicPlus\Hub.lua
 Modules\MythicPlus\KeystoneAdvisor.lua
 Modules\Skins\CharacterSkin.lua
 Modules\BattleRez\ResurrectTracker.lua
 
+Core\Minimap.lua
 Core\Config.lua
 Core\Slash.lua
