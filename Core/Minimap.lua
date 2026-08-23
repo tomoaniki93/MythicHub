@@ -5,7 +5,7 @@
 MythicHub_Minimap = MythicHub_Minimap or {}
 local MM = MythicHub_Minimap
 local L = MythicHub_L
-local ICON = "Interface\\AddOns\\MythicHub\\Textures\\Logo.tga"
+local ICON = "Interface\\AddOns\\MythicHub\\Textures\\MinimapIcon.tga"
 
 local function DB() return MythicHubDB and MythicHubDB.minimap end
 
@@ -32,8 +32,16 @@ end
 
 local function UpdatePosition()
     local b=MM.Button; if not b or not Minimap then return end
-    local db=DB() or {}; local angle=math.rad(tonumber(db.angle) or 225); local radius=80
-    b:ClearAllPoints(); b:SetPoint("CENTER",Minimap,"CENTER",math.cos(angle)*radius,math.sin(angle)*radius)
+    local db=DB() or {}
+    local angle=math.rad(tonumber(db.angle) or 225)
+
+    -- Follow the actual minimap edge instead of a fixed inner orbit.
+    -- This remains correct when the minimap is resized or scaled.
+    local radiusX=(Minimap:GetWidth() or 140)/2
+    local radiusY=(Minimap:GetHeight() or 140)/2
+
+    b:ClearAllPoints()
+    b:SetPoint("CENTER",Minimap,"CENTER",math.cos(angle)*radiusX,math.sin(angle)*radiusY)
 end
 
 function MM:ApplySettings()
@@ -43,17 +51,29 @@ end
 
 function MM:Build()
     if self.Button or not Minimap then return self.Button end
-    local b=CreateFrame("Button","MythicHub_MinimapButton",Minimap,"BackdropTemplate"); self.Button=b
-    b:SetSize(34,34); b:SetFrameStrata("MEDIUM"); b:SetClampedToScreen(true); b:RegisterForClicks("LeftButtonUp","RightButtonUp"); b:RegisterForDrag("LeftButton")
-    b:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8x8",edgeFile="Interface\\Buttons\\WHITE8x8",edgeSize=1});b:SetBackdropColor(.01,.02,.03,1);b:SetBackdropBorderColor(0,.686,1,1)
-    local icon=b:CreateTexture(nil,"ARTWORK"); icon:SetTexture(ICON);icon:SetPoint("TOPLEFT",3,-3);icon:SetPoint("BOTTOMRIGHT",-3,3);icon:SetTexCoord(.04,.96,.04,.96)
+    local b=CreateFrame("Button","MythicHub_MinimapButton",Minimap); self.Button=b
+    b:SetSize(31,31); b:SetFrameStrata("MEDIUM"); b:SetClampedToScreen(true); b:RegisterForClicks("LeftButtonUp","RightButtonUp"); b:RegisterForDrag("LeftButton")
+
+    local icon=b:CreateTexture(nil,"ARTWORK")
+    icon:SetTexture(ICON)
+    icon:SetAllPoints(b)
+    icon:SetTexCoord(0,1,0,1)
+    b.icon = icon
+
+    local highlight=b:CreateTexture(nil,"HIGHLIGHT")
+    highlight:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+    highlight:SetBlendMode("ADD")
+    highlight:SetPoint("CENTER", b, "CENTER", 0, 0)
+    highlight:SetSize(48,48)
+    b.highlight = highlight
+
     b:SetScript("OnClick",function(self,button)
         if button=="RightButton" then MM:ShowMenu(self) elseif MythicHub_Config then MythicHub_Config:Toggle() end
     end)
     b:SetScript("OnDragStart",function(self)
         self:SetScript("OnUpdate",function()
             local db=DB();if not db then return end
-            local mx,my=Minimap:GetCenter();local cx,cy=GetCursorPosition();local scale=UIParent:GetEffectiveScale();cx,cy=cx/scale,cy/scale
+            local mx,my=Minimap:GetCenter();local cx,cy=GetCursorPosition();local scale=Minimap:GetEffectiveScale();cx,cy=cx/scale,cy/scale
             local a=(math.atan2 and math.atan2(cy-my,cx-mx)) or math.atan(cy-my,cx-mx)
             db.angle=math.deg(a);UpdatePosition()
         end)

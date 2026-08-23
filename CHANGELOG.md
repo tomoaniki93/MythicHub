@@ -1,6 +1,14 @@
 # MythicHub Changelog
 
-## 0.1.3-beta
+## 0.1.5-beta
+
+### Fixed
+
+- Removed the extra scripted Blizzard-style gold border from the MythicHub minimap button.
+- The minimap button now follows the **actual outer minimap frame** instead of rotating on a fixed inner 80px orbit.
+- Drag calculations now use the minimap effective scale for more accurate positioning.
+
+## 0.1.4-beta
 
 ### New
 

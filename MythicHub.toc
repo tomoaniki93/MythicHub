@@ -2,7 +2,7 @@
 ## Title: |cff00AFFFMythic|r|cffffffffHub|r
 ## Notes: Standalone Mythic+ toolkit: tracker, MythicHubScore, keystone sync/roulette, overview hub, Character/Inspect skin, teleports and Battle Rez counter.
 ## Author: TomoAniki
-## Version: 0.1.3-beta
+## Version: 0.1.5-beta
 ## SavedVariables: MythicHubDB
 ## IconTexture: Interface\AddOns\MythicHub\Textures\Logo.tga
 ## AddonCompartmentFunc: MythicHub_OnAddonCompartmentClick
