@@ -1,0 +1,1 @@
+-- enUS uses the English fallback defined in Core/Locale.lua.

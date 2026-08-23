@@ -1,0 +1,33 @@
+## Interface: 120100
+## Title: |cff00AFFFMythic|r|cffffffffHub|r
+## Notes: Standalone Mythic+ toolkit: tracker, TomoScore, keystone sync/roulette, overview hub, Character/Inspect skin, teleports and Battle Rez counter.
+## Author: TomoAniki
+## Version: 0.1.0-beta
+## SavedVariables: MythicHubDB
+## IconTexture: Interface\AddOns\MythicHub\Textures\Logo.tga
+## Category: |cffCC44FFTomo|r|cffFFFFFFSuite|r
+
+Core\Core.lua
+Core\Locale.lua
+Locales\enUS.lua
+Locales\frFR.lua
+Locales\deDE.lua
+Locales\esES.lua
+Locales\itIT.lua
+Locales\ptBR.lua
+
+Modules\MythicPlus\DataKeys.lua
+Modules\MythicPlus\KeySync.lua
+Modules\MythicPlus\AutoKeystone.lua
+Modules\MythicPlus\MythicTracker.lua
+Modules\MythicPlus\MythicKeys.lua
+Modules\MythicPlus\TomoScoreCore.lua
+Modules\MythicPlus\TomoScoreData.lua
+Modules\MythicPlus\TomoScoreUI.lua
+Modules\MythicPlus\Hub.lua
+Modules\MythicPlus\KeystoneAdvisor.lua
+Modules\Skins\CharacterSkin.lua
+Modules\BattleRez\ResurrectTracker.lua
+
+Core\Config.lua
+Core\Slash.lua
