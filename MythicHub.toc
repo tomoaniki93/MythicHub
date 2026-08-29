@@ -1,6 +1,7 @@
 ## Interface: 120100
 ## Title: |cff00AFFFMythic|r|cffffffffHub|r
 ## Notes: Standalone Mythic+ toolkit: tracker, MythicHubScore, keystone sync/roulette, overview hub, Character/Inspect skin, teleports and Battle Rez counter.
+## X-Curse-Project-ID: 1665001
 ## Author: TomoAniki
 ## Version: 0.1.6-beta
 ## SavedVariables: MythicHubDB
